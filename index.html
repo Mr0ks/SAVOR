@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Savor — Heritage Collection</title>
+  <meta name="description" content="Savor — an elegant full-screen experience inspired by classic fashion microsites." />
+  <style>
+    /* Reset + base */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: "Helvetica Neue", Inter, Arial, sans-serif;
+      color:#fff;
+      background:#000;
+      overflow:hidden;
+    }
+
+    /* full-screen stage */
+    .stage{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      background:#000;overflow:hidden;
+    }
+
+    /* layered background slides */
+    .slide-wrap{position:absolute;inset:0;pointer-events:none;}
+    .slide{
+      position:absolute;inset:0;background-size:cover;background-position:center;
+      opacity:0;transform:scale(1.02);transition:opacity 1s ease, transform 16s linear;
+      will-change:opacity, transform;
+    }
+    .slide.active{opacity:1;transform:scale(1);}
+    /* subtle overlay */
+    .overlay{
+      position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.6));
+      mix-blend-mode:multiply;pointer-events:none;
+    }
+
+    /* decorative vignette */
+    .vignette{
+      position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 40%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.85) 100%);
+      pointer-events:none;
+    }
+
+    /* logo container */
+    .hero{
+      z-index:10;position:relative;width:90%;max-width:1100px;margin:0 auto;padding:40px 24px;display:flex;flex-direction:column;align-items:center;
+      text-align:center;
+    }
+
+    /* Savor logo animation */
+    .logo{
+      font-weight:700;letter-spacing:6px;font-size:44px;margin-bottom:18px;
+      transform:translateY(30px) scale(.98);opacity:0;
+      animation:logoIn 1s cubic-bezier(.2,.9,.3,1) forwards 0.6s;
+    }
+    @keyframes logoIn{
+      to{transform:translateY(0) scale(1);opacity:1}
+    }
+
+    /* small crest icon to left of logo (simple SVG-like) */
+    .crest{
+      display:inline-block;margin-right:12px;vertical-align:middle;width:44px;height:44px;
+      transform:translateY(30px);opacity:0;animation:crestIn .9s cubic-bezier(.2,.9,.3,1) forwards .7s;
+    }
+    @keyframes crestIn{to{transform:translateY(0);opacity:1}}
+
+    /* animated headline */
+    .headline{
+      font-size:32px;max-width:900px;margin-bottom:14px;line-height:1.05;
+      letter-spacing:1px;opacity:0;transform:translateY(8px);
+      animation:headIn .9s ease forwards 1.2s;
+    }
+    @keyframes headIn{to{opacity:1;transform:none}}
+
+    /* letter-by-letter style */
+    .headline .char{
+      display:inline-block;opacity:0;transform:translateY(14px);
+      animation:charUp .6s cubic-bezier(.2,.9,.3,1) forwards;
+    }
+    /* we'll stagger via JS */
+    @keyframes charUp{to{opacity:1;transform:none}}
+
+    /* subtitle */
+    .sub{
+      opacity:0;color:rgba(255,255,255,0.85);font-size:15px;margin-bottom:28px;
+      animation:subIn .9s ease forwards 1.6s;
+    }
+    @keyframes subIn{to{opacity:1}}
+
+    /* thin rule */
+    .rule{width:90px;height:2px;background:linear-gradient(90deg,#fff, rgba(255,255,255,0.2));margin:18px auto 28px;opacity:.9}
+
+    /* CTA / explore link */
+    .cta{
+      display:inline-block;padding:10px 22px;border:1px solid rgba(255,255,255,0.25);
+      border-radius:8px;text-decoration:none;color:#fff;font-size:14px;margin-top:8px;
+      backdrop-filter:blur(6px);transition:transform .25s ease, box-shadow .25s ease;
+    }
+    .cta:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,0.6)}
+
+    /* right-side corner menu */
+    .menu-btn{
+      position:fixed;right:28px;top:28px;z-index:20;background:transparent;border:0;color:#fff;font-size:14px;
+      display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 12px;border-radius:10px;
+      backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.08);
+    }
+
+    /* menu panel */
+    .menu-panel{
+      position:fixed;right:28px;top:72px;background:rgba(0,0,0,0.6);padding:16px;border-radius:12px;
+      z-index:20;display:flex;flex-direction:column;gap:12px;min-width:220px;opacity:0;transform:translateY(-8px) scale(.98);
+      transition:opacity .25s ease, transform .25s ease;
+      backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.06);
+    }
+    .menu-panel.open{opacity:1;transform:none}
+
+    .menu-panel a{color:#fff;text-decoration:none;font-size:14px;opacity:0.95}
+    .menu-panel a:hover{text-decoration:underline}
+
+    /* footer small */
+    .footer{
+      position:fixed;left:24px;bottom:22px;z-index:20;font-size:13px;color:rgba(255,255,255,0.75);
+      display:flex;gap:14px;align-items:center;
+    }
+
+    /* small responsive tweaks */
+    @media (max-width:700px){
+      .logo{font-size:28px;letter-spacing:3px}
+      .headline{font-size:20px}
+      .crest{width:34px;height:34px}
+      .menu-btn{right:12px;top:12px}
+      .menu-panel{right:12px;top:56px}
+      .footer{left:12px;bottom:12px;font-size:12px}
+    }
+
+    /* small shimmer animation (for luxury feel) */
+    .shimmer{
+      position:relative;display:inline-block;overflow:hidden;
+    }
+    .shimmer::after{
+      content:"";position:absolute;inset:0;
+      background:linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.03) 100%);
+      transform:translateX(-110%);animation:shimmer 3.2s linear infinite;
+      mix-blend-mode:overlay;pointer-events:none;
+    }
+    @keyframes shimmer{to{transform:translateX(110%)}}
+
+    /* simple fade in on page load for accessibility */
+    .preloader{
+      position:fixed;inset:0;background:#000;z-index:30;display:flex;align-items:center;justify-content:center;
+      color:#fff;font-size:14px;letter-spacing:2px;
+    }
+    .preloader.fadeout{opacity:0;pointer-events:none;transition:opacity .6s ease}
+
+  </style>
+</head>
+<body>
+  <!-- Preloader -->
+  <div class="preloader" id="preloader">LOADING</div>
+
+  <div class="stage" id="stage" aria-hidden="false">
+    <!-- layered backgrounds / slides -->
+    <div class="slide-wrap" id="slides">
+      <!-- replace these background-image urls with your own assets in assets/ -->
+      <div class="slide active" style="background-image: url('https://picsum.photos/id/1018/1600/1000');" data-caption="Heritage"></div>
+      <div class="slide" style="background-image: url('https://picsum.photos/id/1011/1600/1000');" data-caption="Craft"></div>
+      <div class="slide" style="background-image: url('https://picsum.photos/id/1005/1600/1000');" data-caption="Elegance"></div>
+      <div class="overlay"></div>
+      <div class="vignette"></div>
+    </div>
+
+    <!-- content -->
+    <div class="hero" role="main" aria-label="Savor hero">
+      <div style="display:flex;align-items:center;justify-content:center;">
+        <svg class="crest" viewBox="0 0 100 100" aria-hidden="true">
+          <defs>
+            <linearGradient id="g" x1="0" x2="1">
+              <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+              <stop offset="1" stop-color="#fff" stop-opacity=".6"/>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="42" fill="none" stroke="url(#g)" stroke-width="4" />
+          <path d="M50 28 L62 60 L50 54 L38 60 Z" fill="url(#g)"/>
+        </svg>
+
+        <div class="logo shimmer" aria-label="Savor logo">S A V O R</div>
+      </div>
+
+      <h2 class="headline" id="headline" aria-live="polite">
+        <!-- We'll animate this letter-by-letter -->
+        <span class="word">A</span> <span class="word">New</span> <span class="word">Language</span> <span class="word">of</span> <span class="word">Elegance</span>
+      </h2>
+
+      <div class="sub">A seasonal collection of crafted objects and stories — revealed in motion.</div>
+
+      <div class="rule" aria-hidden="true"></div>
+
+      <a class="cta" href="#explore" id="exploreBtn" role="button">Explore the Collection</a>
+    </div>
+
+    <!-- menu -->
+    <button class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false">Menu ▾</button>
+    <nav class="menu-panel" id="menuPanel" aria-hidden="true">
+      <a href="#collection">Collection</a>
+      <a href="#stories">Stories</a>
+      <a href="#contact">Contact</a>
+      <a href="#about">About Savor</a>
+    </nav>
+
+    <!-- footer -->
+    <div class="footer">
+      <div>&copy; <span id="year"></span> Savor</div>
+      <div style="opacity:.6">|</div>
+      <div style="opacity:.75">Designed in Motion</div>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- Simple slideshow + parallax + headline letter animation ---------- */
+
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let idx = 0;
+    const SLIDE_DELAY = 6000; // ms
+
+    function nextSlide(){
+      slides[idx].classList.remove('active');
+      idx = (idx+1) % slides.length;
+      slides[idx].classList.add('active');
+    }
+    let slideInterval = setInterval(nextSlide, SLIDE_DELAY);
+
+    // Parallax subtle movement based on mouse
+    const stage = document.getElementById('stage');
+    stage.addEventListener('mousemove', (e)=>{
+      const cx = window.innerWidth/2;
+      const cy = window.innerHeight/2;
+      const dx = (e.clientX - cx) / cx;
+      const dy = (e.clientY - cy) / cy;
+      slides.forEach((s, i)=>{
+        // different layers move slightly different
+        const depth = 1 + i*0.02;
+        s.style.transform = `scale(${1 + i*0.01}) translateX(${dx*depth*6}px) translateY(${dy*depth*6}px)`;
+      })
+    });
+
+    // Headline letter-by-letter entrance
+    const headline = document.getElementById('headline');
+    const text = headline.textContent.trim();
+    // split into characters preserving spaces between words
+    headline.innerHTML = '';
+    let delay = 0;
+    text.split('').forEach((ch, i)=>{
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = ch;
+      // skip animating spaces (keep them)
+      if(ch === ' ') span.style.width = '0.45em';
+      span.style.animationDelay = (0.08 * i) + 's';
+      headline.appendChild(span);
+    });
+
+    // Preloader fade
+    window.addEventListener('load', ()=>{
+      const pre = document.getElementById('preloader');
+      pre.classList.add('fadeout');
+      setTimeout(()=>pre.style.display='none',700);
+    });
+
+    // menu toggle
+    const menuBtn = document.getElementById('menuBtn');
+    const menuPanel = document.getElementById('menuPanel');
+    menuBtn.addEventListener('click', ()=>{
+      const isOpen = menuPanel.classList.toggle('open');
+      menuPanel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+      menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // CTA smooth scroll
+    document.getElementById('exploreBtn').addEventListener('click', (e)=>{
+      e.preventDefault();
+      // simple scroll illusion: pause slideshow and show a caption change
+      clearInterval(slideInterval);
+      document.querySelector('.sub').textContent = 'Opening the collection...';
+      setTimeout(()=>document.querySelector('.sub').textContent = 'A seasonal collection of crafted objects and stories — revealed in motion.', 2000);
+      // resume slideshow after a while
+      setTimeout(()=>{ slideInterval = setInterval(nextSlide, SLIDE_DELAY); }, 4000);
+    });
+
+    // accessibility: set year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* ---------- Notes for you: replace the placeholder images ---------- */
+    /* Replace the <div class="slide" style="background-image: url('...')"> with your own files:
+       - Create /assets/ folder, add 'slide1.jpg', 'slide2.jpg', ...
+       - Then change url(...) to '/assets/slide1.jpg' etc.
+       - You can also replace the crest SVG with your own vector logo.
+       - Adjust fonts, sizes, and letter spacing to taste.
+    */
+
+  </script>
+</body>
+</html>
