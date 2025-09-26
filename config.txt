@@ -1,13 +1,5 @@
 browser=chrome
 homepage=https://mr0ks.github.io/SAVOR/
-whitelist=https://mr0ks.github.io/SAVOR/*
+whitelist=https://mr0ks.github.io/SAVOR mr0ks.github.io
 disable_navigation_bar=yes
 wallpaper=https://raw.githubusercontent.com/Mr0ks/SAVOR/refs/heads/main/images.jpg
-disable_input_devices=yes
-hide_mouse=yes
-right_mouse_click=no
-disable_zoom_controls=yes
-allow_popup_windows=no
-disable_private_mode=yes
-persistence=none
-automatic_updates=no
