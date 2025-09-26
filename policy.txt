@@ -1,0 +1,21 @@
+{
+  "HomepageLocation": "https://mr0ks.github.io/SAVOR/",
+  "HomepageIsNewTabPage": false,
+  "RestoreOnStartup": 4,
+  "RestoreOnStartupURLs": [
+    "https://mr0ks.github.io/SAVOR/"
+  ],
+  "URLBlacklist": [
+    "*"
+  ],
+  "URLWhitelist": [
+    "https://mr0ks.github.io/SAVOR/*"
+  ],
+  "IncognitoModeAvailability": 1,
+  "DeveloperToolsAvailability": 2,
+  "PrintingEnabled": false,
+  "PasswordManagerEnabled": false,
+  "BrowserAddPersonEnabled": false,
+  "AllowDeleteBrowsingHistory": false,
+  "AllowSignInToBrowser": false
+}
